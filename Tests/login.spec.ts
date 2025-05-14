@@ -1,30 +1,20 @@
 import { test, expect } from '@playwright/test';
+import { users } from '../test-data/credentials';
 
-const userData = {
-    valid: { username: 'standard_user', password: 'secret_sauce' },
-    lockedOut: { username: 'locked_out_user', password: 'secret_sauce' },
-    problem: { username: 'problem_user', password: 'secret_sauce' },
-    performance: { username: 'performance_glitch_user', password: 'secret_sauce' },
-    invalid: { username: 'invalid_user', password: 'wrong_pass' }
-  };
 
 test.describe('Login Page Tests', () => {
 
     test.beforeEach(async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/');
+    await page.goto('/');
     
-});
+});2
 
-    test('Loading Login page and checking title', async ({ page }) => {
+    test('Login page and Login form validation', async ({ page }) => {
     
         
         const title = page.locator('//div[@class="login_logo"]');
         await expect(title).toContainText('Swag Labs');
 
-    });
-
-    test('Checking Login form fields', async ({ page }) => {
-        
         const userName = page.locator('input[data-test="username"]');
         const userPassword = page.locator('input[data-test="password"]');
         const loginButton = page.locator('input[data-test="login-button"]');
@@ -37,54 +27,50 @@ test.describe('Login Page Tests', () => {
 
     test('Log in without username', async ({ page }) => {
     
-        await page.fill('input[data-test="password"]', userData.valid.password);
+        await page.fill('input[data-test="password"]', users.valid.password);
         await page.click('input[data-test="login-button"]');
 
         const errorUsername = await page.locator('//*[@id="login_button_container"]//h3');
-        await expect(errorUsername).toContainText('Epic sadface: Username is required')
-        await page.click('//button[@class="error-button"]');
+        await expect(errorUsername).toContainText('Epic sadface: Username is required');
     
     });
 
     test('Log in without password', async ({ page }) => {
 
-        await page.fill('input[data-test="username"]', userData.valid.username);
+        await page.fill('input[data-test="username"]', users.valid.username);
         await page.click('input[data-test="login-button"]');
 
         const errorPassword = await page.locator('//*[@id="login_button_container"]//h3');
         await expect(errorPassword).toContainText('Epic sadface: Password is required');
-        await page.click('//button[@class="error-button"]');
     
     });
 
     test('Log in with invalid username/password', async ({ page }) => {
     
         await page.fill('input[data-test="username"]', 'test');
-        await page.fill('input[data-test="password"]', userData.valid.password);
+        await page.fill('input[data-test="password"]', users.valid.password);
         await page.click('input[data-test="login-button"]');
 
         const invalidUsernamePassword = await page.locator('//*[@id="login_button_container"]//h3');
         await expect(invalidUsernamePassword).toContainText('Epic sadface: Username and password do not match any user in this service');
-        await page.click('//button[@class="error-button"]');
 
     });
 
     test('Log in with locked user', async ({ page }) => {
 
-        await page.fill('input[data-test="username"]', userData.lockedOut.username), { delay: 150 };
-        await page.fill('input[data-test="password"]', userData.lockedOut.password);
+        await page.fill('input[data-test="username"]', users.locked.username), { delay: 150 };
+        await page.fill('input[data-test="password"]', users.locked.password);
         await page.click('input[data-test="login-button"]');
 
         const errorLocked = page.locator('//*[@id="login_button_container"]//h3');
         await expect(errorLocked).toContainText('Epic sadface: Sorry, this user has been locked out.');
-        await page.click('//button[@class="error-button"]');
 
     });
 
     test('Log in with valid user', async ({ page }) => {
 
-        await page.fill('input[data-test="username"]', userData.valid.username), { delay: 150 };
-        await page.fill('input[data-test="password"]', userData.valid.password);
+        await page.fill('input[data-test="username"]', users.valid.username), { delay: 150 };
+        await page.fill('input[data-test="password"]', users.valid.password);
         await page.click('input[data-test="login-button"]');
 
         await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
